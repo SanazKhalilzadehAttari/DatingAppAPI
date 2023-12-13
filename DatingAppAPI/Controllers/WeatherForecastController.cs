@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DatingAppAPI.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+
+    public class WeatherForecastController : APIBaseController
     {
         private static readonly string[] Summaries = new[]
         {
