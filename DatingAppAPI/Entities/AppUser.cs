@@ -1,4 +1,6 @@
-﻿namespace DatingAppAPI.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DatingAppAPI.Entities
 {
     public class AppUser
     {
