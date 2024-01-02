@@ -23,8 +23,9 @@ namespace DatingAppAPI.Extnsions
                 opt.AddDefaultPolicy(policy=> policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             });*/
             services.AddScoped<IJWTTokenInterface, JWTTokenService>();
-           
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddCors();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return services;
         }
