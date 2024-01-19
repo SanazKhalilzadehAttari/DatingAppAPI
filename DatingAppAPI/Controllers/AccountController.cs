@@ -37,12 +37,13 @@ namespace DatingAppAPI.Controllers
             {
                 Username = user.UserName,
                 Token = _jWTToken.CreateToken(user)
+              
             };
         }
         [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(x=> x.UserName == loginDTO.Username);
+            var user = await _dataContext.Users.Include(p => p.Photos).FirstOrDefaultAsync(x=> x.UserName == loginDTO.Username);
             if (user == null) return Unauthorized("invalid user");
             using var hmac = new HMACSHA512(user.PasswordSalt);
             var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
@@ -53,7 +54,8 @@ namespace DatingAppAPI.Controllers
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _jWTToken.CreateToken(user)
+                Token = _jWTToken.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(y => y.IsMain)?.Url
             };
         }
        private async Task<bool> IsUserExist(string username)

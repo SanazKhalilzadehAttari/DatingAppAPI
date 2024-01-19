@@ -61,9 +61,15 @@ namespace DatingAppAPI.Data
             return _context.Users;
         }
 
+        public async Task<bool> SaveAsync()
+        {
+            return await _context.SaveChangesAsync()>0? true:false;
+        }
+
         public void Update(AppUser user)
         {
             _context.Entry(user).State = EntityState.Modified;
+            _context.SaveChanges();
         }
     }
 }

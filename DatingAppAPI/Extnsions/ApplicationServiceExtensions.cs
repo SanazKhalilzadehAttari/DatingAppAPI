@@ -1,8 +1,10 @@
 ﻿using DatingAppAPI.Data;
+using DatingAppAPI.Helpers;
 using DatingAppAPI.Interfaces;
 using DatingAppAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -26,6 +28,8 @@ namespace DatingAppAPI.Extnsions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddCors();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.Configure<CloudinaySettings>(config.GetSection("CloudinarySetting"));
+            services.AddScoped<IPhotoService,PhotoServices>();
 
             return services;
         }
