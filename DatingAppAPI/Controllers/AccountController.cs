@@ -1,4 +1,5 @@
-﻿using DatingAppAPI.Data;
+﻿using AutoMapper;
+using DatingAppAPI.Data;
 using DatingAppAPI.DTOs;
 using DatingAppAPI.Entities;
 using DatingAppAPI.Interfaces;
@@ -13,30 +14,33 @@ namespace DatingAppAPI.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IJWTTokenInterface _jWTToken;
+        private readonly IMapper _mapper;
 
-        public AccountController(DataContext dataContext, IJWTTokenInterface jWTToken)
+        public AccountController(DataContext dataContext,
+            IJWTTokenInterface jWTToken,IMapper mapper)
         {
             _dataContext = dataContext;
             _jWTToken = jWTToken;
+            _mapper = mapper;
         }
         [HttpPost("Register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
         {
             if (await IsUserExist(registerDTO.Username.ToLower())) return BadRequest("the user is existed");
+            var user = _mapper.Map<AppUser>(registerDTO);
             using var hmac = new HMACSHA512();
-            var user = new AppUser
-            {
-                UserName = registerDTO.Username.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password)),
-                PasswordSalt = hmac.Key
-            };
+            user.UserName= registerDTO.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password));
+            user.PasswordSalt = hmac.Key;
+            
             _dataContext.Add(user);
             await _dataContext.SaveChangesAsync();
 
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _jWTToken.CreateToken(user)
+                Token = _jWTToken.CreateToken(user),
+                KnownAs= user.KnownAs
               
             };
         }
@@ -55,7 +59,8 @@ namespace DatingAppAPI.Controllers
             {
                 Username = user.UserName,
                 Token = _jWTToken.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(y => y.IsMain)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(y => y.IsMain)?.Url,
+                KnownAs= user.KnownAs
             };
         }
        private async Task<bool> IsUserExist(string username)

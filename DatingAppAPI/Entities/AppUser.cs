@@ -1,5 +1,6 @@
 ﻿using DatingAppAPI.Extnsions;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,7 +26,7 @@ namespace DatingAppAPI.Entities
         public string Country { get; set; }
 
 
-        public List<Photo> Photos { get; set; } = new List<Photo>();
+        public Collection<Photo>? Photos { get; set; }
 
         public int getAge()
         {
