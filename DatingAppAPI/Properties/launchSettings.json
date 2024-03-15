@@ -15,7 +15,7 @@
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:44321/",
+      "launchUrl": "https://localhost:7222/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -26,7 +26,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:44321",
+      "launchUrl": "https://localhost:7222",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -37,8 +37,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:30447",
-      "sslPort": 44321
+      "applicationUrl": "http://localhost:5231",
+      "sslPort": 7222
     }
   }
 }

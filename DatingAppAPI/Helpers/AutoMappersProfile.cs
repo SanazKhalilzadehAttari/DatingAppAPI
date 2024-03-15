@@ -5,10 +5,13 @@ using DatingAppAPI.Extnsions;
 
 namespace DatingAppAPI.Helpers
 {
-    public class AutoMappersProfile:Profile
+    public class AutoMappersProfile : Profile
     {
         public AutoMappersProfile()
         {
+            //string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            //string imageRelativePath = "...";
+            //string imagePath = Path.Combine(baseDirectory, imageRelativePath);
             CreateMap<AppUser, MemberDto>()
      .ForMember(
          dest => dest.PhotoUrl,
@@ -20,8 +23,21 @@ namespace DatingAppAPI.Helpers
      ).ForMember(des => des.Age, opt => opt.MapFrom(src => src.DateOfBirth.CalculateAge()));
             CreateMap<Photo, PhotoDto>();
             CreateMap<MemberUpdateDTO, AppUser>();
-            CreateMap<RegisterDTO,AppUser>();
+            CreateMap<RegisterDTO, AppUser>();
+
+            CreateMap<Message, MessageDto>();
+
+
+
         }
-        
+       /* .ForMember(
+                des => des.SenderPhotoUrl,
+                opt => opt.MapFrom(src => src.Sender.Photos.FirstOrDefault(p => p.IsMain))
+                )
+                .ForMember(
+                des => des.RecipientPhotoUrl, opt => opt.MapFrom(src =>
+                src.Recipient.Photos.FirstOrDefault(p => p.IsMain)));*/
+
     }
+
 }
