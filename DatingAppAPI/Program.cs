@@ -1,9 +1,11 @@
 using DatingAppAPI.Data;
+using DatingAppAPI.Entities;
 using DatingAppAPI.Errors;
 using DatingAppAPI.Extnsions;
 using DatingAppAPI.Interfaces;
 using DatingAppAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -38,11 +40,13 @@ app.MapControllers();
 
 using var scope =app.Services.CreateScope();
 var services= scope.ServiceProvider;
+var userManager = services.GetRequiredService<UserManager<AppUser>>();
+var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 try
 {
     var context = services.GetRequiredService<DataContext>();
     await context.Database.MigrateAsync();
-    await Seeds.SeedUsers(context);
+    await Seeds.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)
 {

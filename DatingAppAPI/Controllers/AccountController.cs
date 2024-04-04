@@ -3,6 +3,7 @@ using DatingAppAPI.Data;
 using DatingAppAPI.DTOs;
 using DatingAppAPI.Entities;
 using DatingAppAPI.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -12,14 +13,14 @@ namespace DatingAppAPI.Controllers
 {
     public class AccountController : APIBaseController
     {
-        private readonly DataContext _dataContext;
+        private readonly UserManager<AppUser> _userManager;
         private readonly IJWTTokenInterface _jWTToken;
         private readonly IMapper _mapper;
 
-        public AccountController(DataContext dataContext,
+        public AccountController(UserManager<AppUser> userManager,
             IJWTTokenInterface jWTToken,IMapper mapper)
         {
-            _dataContext = dataContext;
+            _userManager = userManager;
             _jWTToken = jWTToken;
             _mapper = mapper;
         }
@@ -28,18 +29,19 @@ namespace DatingAppAPI.Controllers
         {
             if (await IsUserExist(registerDTO.Username.ToLower())) return BadRequest("the user is existed");
             var user = _mapper.Map<AppUser>(registerDTO);
-            using var hmac = new HMACSHA512();
+           /* using var hmac = new HMACSHA512();
             user.UserName= registerDTO.Username.ToLower();
             user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password));
-            user.PasswordSalt = hmac.Key;
+            user.PasswordSalt = hmac.Key;*/
             
-            _dataContext.Add(user);
-            await _dataContext.SaveChangesAsync();
-
+           var result = await _userManager.CreateAsync(user, registerDTO.Password);
+            if(!result.Succeeded) { return BadRequest(result.Errors); }
+            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
+            if(!roleResult.Succeeded) return BadRequest(roleResult.Errors);
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _jWTToken.CreateToken(user),
+                Token = await _jWTToken.CreateToken(user),
                 KnownAs= user.KnownAs,
                 Gender= user.Gender
               
@@ -48,18 +50,20 @@ namespace DatingAppAPI.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await _dataContext.Users.Include(p => p.Photos).FirstOrDefaultAsync(x=> x.UserName == loginDTO.Username);
+            var user = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(x=> x.UserName == loginDTO.Username);
             if (user == null) return Unauthorized("invalid user");
-            using var hmac = new HMACSHA512(user.PasswordSalt);
+           /* using var hmac = new HMACSHA512(user.PasswordSalt);
             var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
             for(int i = 0; i < computeHash.Length; i++)
             {
                 if (computeHash[i] != user.PasswordHash[i]) return Unauthorized("invalid Password"); 
-            }
+            }*/
+           var result = await _userManager.CheckPasswordAsync(user,loginDTO.Password);
+            if (!result) return Unauthorized("invalid password"); 
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _jWTToken.CreateToken(user),
+                Token =await _jWTToken.CreateToken(user),
                 PhotoUrl = user.Photos.FirstOrDefault(y => y.IsMain)?.Url,
                 KnownAs= user.KnownAs,
                 Gender = user.Gender,
@@ -67,7 +71,7 @@ namespace DatingAppAPI.Controllers
         }
        private async Task<bool> IsUserExist(string username)
         {
-            return await _dataContext.Users.AnyAsync(x => x.UserName == username.ToLower());
+            return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower());
         }
     }
 }
