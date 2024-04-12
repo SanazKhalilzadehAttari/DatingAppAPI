@@ -4,6 +4,7 @@ using DatingAppAPI.Errors;
 using DatingAppAPI.Extnsions;
 using DatingAppAPI.Interfaces;
 using DatingAppAPI.Services;
+using DatingAppAPI.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,27 +26,36 @@ app.UseMiddleware<ExceptionMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-   // app.UseDeveloperExceptionPage();
+    // app.UseDeveloperExceptionPage();
     //app.UseSwagger();
     //app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 //app.UseCors();
-app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+app.UseCors(builder => builder
+.AllowAnyHeader()
+.AllowAnyMethod()
+.AllowCredentials()
+.WithOrigins("https://localhost:4200"));
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PresenceHub>("hubs/presence");
+app.MapHub<MessageHub>("hubs/message");
 
-using var scope =app.Services.CreateScope();
-var services= scope.ServiceProvider;
-var userManager = services.GetRequiredService<UserManager<AppUser>>();
-var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+
 try
 {
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     var context = services.GetRequiredService<DataContext>();
+    //context.Connections.RemoveRange(context.Connections);
     await context.Database.MigrateAsync();
+    await context.Database.ExecuteSqlRawAsync("DELETE FROM [Connections]");
     await Seeds.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)

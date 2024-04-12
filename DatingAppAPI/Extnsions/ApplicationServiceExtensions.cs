@@ -2,6 +2,7 @@
 using DatingAppAPI.Helpers;
 using DatingAppAPI.Interfaces;
 using DatingAppAPI.Services;
+using DatingAppAPI.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,8 @@ namespace DatingAppAPI.Extnsions
             services.AddScoped<LogUserActivity>();
             services.AddScoped<ILikesRepository, LikesRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddSignalR();
+            services.AddSingleton<PresenceTracker>();
 
             return services;
         }
