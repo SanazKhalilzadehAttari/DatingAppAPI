@@ -13,7 +13,5 @@ namespace DatingAppAPI.Interfaces
         Task<MemberDto> GetMemberAsync(string userParams);
         Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams);
         Task<string> GetUserGender(string username);
-
-        Task<bool> SaveAsync();
     } 
 }

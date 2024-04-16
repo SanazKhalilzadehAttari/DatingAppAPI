@@ -26,17 +26,14 @@ namespace DatingAppAPI.Extnsions
                 opt.AddDefaultPolicy(policy=> policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             });*/
             services.AddScoped<IJWTTokenInterface, JWTTokenService>();
-            services.AddScoped<IUserRepository, UserRepository>();
             services.AddCors();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.Configure<CloudinaySettings>(config.GetSection("CloudinarySetting"));
             services.AddScoped<IPhotoService,PhotoServices>();
             services.AddScoped<LogUserActivity>();
-            services.AddScoped<ILikesRepository, LikesRepository>();
-            services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddSignalR();
             services.AddSingleton<PresenceTracker>();
-
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
     }
